@@ -1,5 +1,5 @@
-//go:build release || !debug
-// +build release !debug
+//go:build !debug
+// +build !debug
 
 package logger
 
