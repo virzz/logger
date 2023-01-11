@@ -11,9 +11,14 @@ import (
 
 var debug = false
 
-func SetDebug() {
-	debug = !debug
+func SetDebug(b ...bool) {
+	if len(b) > 0 {
+		debug = b[0]
+	} else {
+		debug = !debug
+	}
 }
+
 func IsDebug() bool {
 	return debug
 }

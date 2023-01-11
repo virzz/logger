@@ -3,7 +3,7 @@
 
 package logger
 
-func SetDebug() {}
+func SetDebug(b ...bool) {}
 
 func IsDebug() bool {
 	return false
