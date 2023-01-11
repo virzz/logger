@@ -5,12 +5,11 @@
 ```bash
 # Debug
     go build -tags debug
+
+# Release
+    go build
     # or
     go build -tags !debug
-# Release
-    go build -tags release
-    # or
-    go build -tags !release
 ```
 
 ## Import 
