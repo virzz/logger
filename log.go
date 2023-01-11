@@ -11,15 +11,6 @@ import (
 
 var std = DefaultOutput()
 
-var debug = false
-
-func SetDebug() {
-	debug = !debug
-}
-func IsDebug() bool {
-	return debug
-}
-
 func DefaultOutput() *log.Logger {
 	return log.New(os.Stderr, "", 0)
 }
@@ -81,21 +72,6 @@ func Normal(v ...any) {
 }
 func NormalF(format string, v ...any) {
 	Print(color.LightWhite.Sprintf(format, v...))
-}
-
-func Debug(v ...any) {
-	if debug {
-		std.SetFlags(log.Lshortfile | log.LstdFlags)
-		Print(color.LightBlue.Sprint(append([]any{"\n[*] "}, v...)...))
-		std.SetFlags(0)
-	}
-}
-func DebugF(format string, v ...any) {
-	if debug {
-		std.SetFlags(log.Lshortfile | log.LstdFlags)
-		Print(color.LightBlue.Sprintf("\n[*] "+format, v...))
-		std.SetFlags(0)
-	}
 }
 
 // ======= Log to File =========

@@ -1,5 +1,18 @@
 # Logger
 
+## Build Tags
+
+```bash
+# Debug
+    go build -tags debug
+    # or
+    go build -tags !debug
+# Release
+    go build -tags release
+    # or
+    go build -tags !release
+```
+
 ## Import 
 
 ```golang
