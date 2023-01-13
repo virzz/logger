@@ -11,14 +11,19 @@ import (
 
 var std = DefaultOutput()
 
+// ======= Config =======
+
+// DefaultOutput New Default Output
 func DefaultOutput() *log.Logger {
 	return log.New(os.Stderr, "", 0)
 }
 
+// SetOutput Set Output
 func SetOutput(w io.Writer) {
 	std.SetOutput(w)
 }
 
+// SetPrefix Set Prefix
 func SetPrefix(prefix ...string) {
 	if len(prefix) > 0 && prefix[0] != "" {
 		std.SetPrefix(color.LightMagenta.Sprintf("[%s] ", prefix[0]))
@@ -27,54 +32,7 @@ func SetPrefix(prefix ...string) {
 	}
 }
 
-func Panic(v ...any) {
-	std.Panic(v...)
-}
-
-func Print(v ...any) {
-	std.Output(3, fmt.Sprint(v...))
-}
-
-func Printf(format string, v ...any) {
-	Print(fmt.Sprintf(format, v...))
-}
-
-func Success(v ...any) {
-	Print(color.LightGreen.Sprint(append([]any{"[+] "}, v...)...))
-}
-func SuccessF(format string, v ...any) {
-	Print(color.LightGreen.Sprintf("[+] "+format, v...))
-}
-
-func Error(v ...any) {
-	Print(color.LightRed.Sprint(append([]any{"[-] "}, v...)...))
-}
-func ErrorF(format string, v ...any) {
-	Print(color.LightRed.Sprintf("[-] "+format, v...))
-}
-
-func Warn(v ...any) {
-	Print(color.LightYellow.Sprint(append([]any{"[!] "}, v...)...))
-}
-func WarnF(format string, v ...any) {
-	Print(color.LightYellow.Sprintf("[!] "+format, v...))
-}
-
-func Info(v ...any) {
-	Print(color.LightCyan.Sprint(append([]any{"[~] "}, v...)...))
-}
-func InfoF(format string, v ...any) {
-	Print(color.LightCyan.Sprintf("[~] "+format, v...))
-}
-
-func Normal(v ...any) {
-	Print(color.LightWhite.Sprint(v...))
-}
-func NormalF(format string, v ...any) {
-	Print(color.LightWhite.Sprintf(format, v...))
-}
-
-// ======= Log to File =========
+// ======= Log to File =======
 
 type LogWriter struct {
 	lf *os.File
@@ -102,4 +60,60 @@ func LogAsFileOutput(name ...string) {
 		_name = name[0]
 	}
 	std = FileOutput(_name)
+}
+
+func fatal(v ...any) {
+	std.Fatal(v...)
+}
+
+func print(v ...any) {
+	std.Output(3, fmt.Sprint(v...))
+}
+
+// ======= Export Logger Function =======
+
+func Normal(v ...any) {
+	print(color.LightWhite.Sprint(append([]any{"📃 "}, v...)...))
+}
+func NormalF(format string, v ...any) {
+	print(color.LightWhite.Sprintf("📃 "+format, v...))
+}
+
+func Info(v ...any) {
+	print(color.LightCyan.Sprint(append([]any{"💡 "}, v...)...))
+}
+func InfoF(format string, v ...any) {
+	print(color.LightCyan.Sprintf("💡 "+format, v...))
+}
+
+func Warn(v ...any) {
+	print(color.LightYellow.Sprint(append([]any{"💊 "}, v...)...))
+}
+func WarnF(format string, v ...any) {
+	print(color.LightYellow.Sprintf("💊 "+format, v...))
+}
+
+func Success(v ...any) {
+	print(color.LightGreen.Sprint(append([]any{"✅ "}, v...)...))
+}
+func SuccessF(format string, v ...any) {
+	print(color.LightGreen.Sprintf("✅ "+format, v...))
+}
+
+func Error(v ...any) {
+	print(color.LightRed.Sprint(append([]any{"❎ "}, v...)...))
+}
+func ErrorF(format string, v ...any) {
+	print(color.LightRed.Sprintf("❎ "+format, v...))
+}
+
+func Fatal(v ...any) {
+	fatal(color.LightMagenta.Sprint(append([]any{"💢 "}, v...)...))
+}
+func FatalF(format string, v ...any) {
+	fatal(color.LightMagenta.Sprintf("💢 "+format, v...))
+}
+
+func Panic(v ...any) {
+	std.Panic(v...)
 }

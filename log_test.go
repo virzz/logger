@@ -34,20 +34,35 @@ func TestInfo(t *testing.T) {
 	InfoF("test Info")
 }
 
-func TestPrint(t *testing.T) {
-	Print("test")
-	Printf("test Print")
+func TestNormal(t *testing.T) {
+	Normal("test")
+	NormalF("test Normal")
 }
 
 func TestPrefix(t *testing.T) {
 	SetPrefix("PREFIX")
-	Print("test")
-	Printf("test Prefix")
+	Normal("test")
+	NormalF("test Prefix")
 	Debug(`Debug
 ttttttbikasebd
 aegvagsrrdgvs
 	agrehted`)
 	SetPrefix()
+}
+
+func TestAll(t *testing.T) {
+	SetDebug()
+	Debug(`Debug`)
+	Success(`Success`)
+	Error(`Error`)
+	Warn(`Warn`)
+	Info(`Info`)
+	Fatal(`Fatal`)
+}
+
+func TestFatal(t *testing.T) {
+	Fatal("test")
+	FatalF("test Normal")
 }
 
 // func TestPanic(t *testing.T) {
