@@ -10,6 +10,7 @@ import (
 )
 
 var std = DefaultOutput()
+var calldepth = 3
 
 // ======= Config =======
 
@@ -19,8 +20,18 @@ func DefaultOutput() *log.Logger {
 }
 
 // SetOutput Set Output
+func SetFlags(flag int) {
+	std.SetFlags(flag)
+}
+
+// SetOutput Set Output
 func SetOutput(w io.Writer) {
 	std.SetOutput(w)
+}
+
+// SetCalldepth Set Calldepth
+func SetCalldepth(i int) {
+	calldepth = i
 }
 
 // SetPrefix Set Prefix
@@ -63,11 +74,12 @@ func LogAsFileOutput(name ...string) {
 }
 
 func fatal(v ...any) {
-	std.Fatal(v...)
+	std.Output(calldepth, fmt.Sprint(v...))
+	os.Exit(1)
 }
 
 func print(v ...any) {
-	std.Output(3, fmt.Sprint(v...))
+	std.Output(calldepth, fmt.Sprint(v...))
 }
 
 // ======= Export Logger Function =======
@@ -115,5 +127,6 @@ func FatalF(format string, v ...any) {
 }
 
 func Panic(v ...any) {
-	std.Panic(v...)
+	std.Output(calldepth, fmt.Sprint(v...))
+	panic(v)
 }
