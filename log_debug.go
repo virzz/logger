@@ -37,3 +37,32 @@ func DebugF(format string, v ...any) {
 		std.SetFlags(0)
 	}
 }
+
+// Logger
+
+func (l *Logger) SetDebug(b ...bool) {
+	if len(b) > 0 {
+		l.debug = b[0]
+	} else {
+		l.debug = !l.debug
+	}
+}
+
+func (l *Logger) IsDebug() bool {
+	return l.debug
+}
+
+func (l *Logger) Debug(v ...any) {
+	if l.debug {
+		l.std.SetFlags(log.Lshortfile | log.LstdFlags)
+		l.print(color.LightBlue.Sprint(append([]any{"\n🐛 "}, v...)...))
+		l.std.SetFlags(0)
+	}
+}
+func (l *Logger) DebugF(format string, v ...any) {
+	if l.debug {
+		l.std.SetFlags(log.Lshortfile | log.LstdFlags)
+		l.print(color.LightBlue.Sprintf("\n🐛 "+format, v...))
+		l.std.SetFlags(0)
+	}
+}
