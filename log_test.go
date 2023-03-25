@@ -39,35 +39,44 @@ func TestNormal(t *testing.T) {
 	NormalF("test Normal")
 }
 
-func TestPrefix(t *testing.T) {
-	SetPrefix("PREFIX")
-	Normal("test")
-	NormalF("test Prefix")
-	Debug(`Debug
-ttttttbikasebd
-aegvagsrrdgvs
-	agrehted`)
-	SetPrefix()
-}
-
-func TestAll(t *testing.T) {
-	SetDebug()
-	Debug(`Debug`)
-	Success(`Success`)
-	Error(`Error`)
-	Warn(`Warn`)
-	Info(`Info`)
-	Fatal(`Fatal`)
-}
-
 func TestFatal(t *testing.T) {
 	Fatal("test")
 	FatalF("test Normal")
 }
 
-// func TestPanic(t *testing.T) {
-// 	Panic("test")
-// }
+func TestPrefix(t *testing.T) {
+	SetPrefix("PREFIX")
+	Normal("test")
+	NormalF("test Prefix")
+	Success("test Prefix Success")
+	Debug("Debug ttttttbikasebd")
+	SetPrefix("")
+}
+
+func TestFlags(t *testing.T) {
+	SetDevFlags()
+	SetPrefix("PREFIX")
+	Normal("test")
+	NormalF("test Prefix")
+	Success("test Prefix Success")
+	Debug("Debug ttttttbikasebd")
+	SetPrefix("")
+}
+func TestAll(t *testing.T) {
+	Debug("Debug")
+	DebugF("DebugF %s", "test")
+	Success("Success")
+	SuccessF("SuccessF %s", "test")
+	Error("Error")
+	ErrorF("ErrorF %s", "test")
+	Warn("Warn")
+	WarnF("WarnF %s", "test")
+	Info("Info")
+	InfoF("InfoF %s", "test")
+	Normal("Normal")
+	NormalF("NormalF %s", "test")
+	Fatal("Fatal")
+}
 
 func BenchmarkSprintf(b *testing.B) {
 	b.Run("Sprintf - 1", func(b *testing.B) {
