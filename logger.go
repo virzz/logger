@@ -53,13 +53,10 @@ var std = NewLogger()
 func NewLogger() *Logger                    { return &Logger{std: log.New(os.Stderr, "", 0), depth: 3} }
 func GetLogger() *Logger                    { return std }
 func (l *Logger) GetLogLogger() *log.Logger { return l.std }
-
+func (l *Logger) print(lv int, v ...any)    { l.std.Output(l.depth, C[lv].Text(ICO[lv]+fmt.Sprint(v...))) }
 func (l *Logger) fatal(lv int, v ...any) {
 	l.std.Output(l.depth, color.Text(ICO[lv]+fmt.Sprint(v...)))
 	os.Exit(1)
-}
-func (l *Logger) print(lv int, v ...any) {
-	l.std.Output(l.depth, C[lv].Text(ICO[lv]+fmt.Sprint(v...)))
 }
 
 /* ======= Export Logger Function (l *Logger) ======= */
@@ -96,13 +93,12 @@ func (l *Logger) SuccessF(f string, v ...any) { l.print(SUCCESS, fmt.Sprintf(f, 
 
 /* ======= Export Logger Function ======= */
 
-func SetFlags(flag int)       { std.SetFlags(flag) }
-func SetDevFlags()            { std.SetDevFlags() }
-func ResetFlags()             { std.ResetFlags() }
-func SetOutput(w io.Writer)   { std.SetOutput(w) }
-func Setdepth(i int)          { std.Setdepth(i) }
-func SetPrefix(prefix string) { std.SetPrefix(prefix) }
-
+func SetFlags(flag int)           { std.SetFlags(flag) }
+func SetDevFlags()                { std.SetDevFlags() }
+func ResetFlags()                 { std.ResetFlags() }
+func SetOutput(w io.Writer)       { std.SetOutput(w) }
+func Setdepth(i int)              { std.Setdepth(i) }
+func SetPrefix(prefix string)     { std.SetPrefix(prefix) }
 func Normal(v ...any)             { std.Normal(v...) }
 func Info(v ...any)               { std.Info(v...) }
 func Warn(v ...any)               { std.Warn(v...) }
