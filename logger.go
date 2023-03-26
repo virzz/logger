@@ -5,8 +5,6 @@ import (
 	"io"
 	"log"
 	"os"
-
-	"github.com/gookit/color"
 )
 
 const (
@@ -55,7 +53,7 @@ func GetLogger() *Logger                    { return std }
 func (l *Logger) GetLogLogger() *log.Logger { return l.std }
 func (l *Logger) print(lv int, v ...any)    { l.std.Output(l.depth, C[lv].Text(ICO[lv]+fmt.Sprint(v...))) }
 func (l *Logger) fatal(lv int, v ...any) {
-	l.std.Output(l.depth, color.Text(ICO[lv]+fmt.Sprint(v...)))
+	l.std.Output(l.depth, C[lv].Text(ICO[lv]+fmt.Sprint(v...)))
 	os.Exit(1)
 }
 
@@ -72,7 +70,7 @@ func (l *Logger) SetOutput(w io.Writer) { l.std.SetOutput(w) }
 func (l *Logger) SetDepth(i int)        { l.depth = i }
 func (l *Logger) SetPrefix(prefix string) {
 	if len(prefix) > 0 {
-		l.std.SetPrefix(color.LightMagenta.Sprintf("[%s] ", prefix))
+		l.std.SetPrefix(C[PREFIEX].Text(fmt.Sprintf("[%s] ", prefix)))
 	} else {
 		l.std.SetPrefix("")
 	}
