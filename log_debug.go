@@ -10,12 +10,12 @@ import (
 
 func (l *Logger) Debug(v ...any) {
 	l.SetFlags(log.Llongfile | log.LstdFlags)
-	l.print(DEBUG, v...)
+	l.print(L_DEBUG, v...)
 	l.ResetFlags()
 }
 func (l *Logger) DebugF(format string, v ...any) {
 	l.SetFlags(log.Llongfile | log.LstdFlags)
-	l.print(DEBUG, fmt.Sprintf(format, v...))
+	l.print(L_DEBUG, fmt.Sprintf(format, v...))
 	l.ResetFlags()
 }
 func Debug(v ...any)                 { std.Debug(v...) }
