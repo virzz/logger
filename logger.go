@@ -35,7 +35,7 @@ var (
 		INFO:    LightCyan,
 		WARN:    LightYellow,
 		ERROR:   LightRed,
-		FATAL:   DarkGray,
+		FATAL:   LightRed,
 		SUCCESS: LightGreen,
 		DEBUG:   LightBlue,
 		PREFIEX: LightMagenta,
@@ -50,7 +50,7 @@ type Logger struct {
 
 var std = NewLogger()
 
-func NewLogger() *Logger                    { return &Logger{std: log.New(os.Stderr, "", 0), depth: 3} }
+func NewLogger() *Logger                    { return &Logger{std: log.New(os.Stderr, "", 0), depth: 4} }
 func GetLogger() *Logger                    { return std }
 func (l *Logger) GetLogLogger() *log.Logger { return l.std }
 func (l *Logger) print(lv int, v ...any)    { l.std.Output(l.depth, C[lv].Text(ICO[lv]+fmt.Sprint(v...))) }
@@ -69,7 +69,7 @@ func (l *Logger) SetDevFlags()          { l.SetFlags(log.Llongfile | log.LstdFla
 func (l *Logger) SetDefaultFlags()      { l.SetFlags(0) }
 func (l *Logger) ResetFlags()           { l.std.SetFlags(l.currentFlag) }
 func (l *Logger) SetOutput(w io.Writer) { l.std.SetOutput(w) }
-func (l *Logger) Setdepth(i int)        { l.depth = i }
+func (l *Logger) SetDepth(i int)        { l.depth = i }
 func (l *Logger) SetPrefix(prefix string) {
 	if len(prefix) > 0 {
 		l.std.SetPrefix(color.LightMagenta.Sprintf("[%s] ", prefix))
@@ -97,7 +97,7 @@ func SetFlags(flag int)           { std.SetFlags(flag) }
 func SetDevFlags()                { std.SetDevFlags() }
 func ResetFlags()                 { std.ResetFlags() }
 func SetOutput(w io.Writer)       { std.SetOutput(w) }
-func Setdepth(i int)              { std.Setdepth(i) }
+func SetDepth(i int)              { std.SetDepth(i) }
 func SetPrefix(prefix string)     { std.SetPrefix(prefix) }
 func Normal(v ...any)             { std.Normal(v...) }
 func Info(v ...any)               { std.Info(v...) }

@@ -17,8 +17,10 @@
 ```golang
 import "github.com/virzz/logger"
 
+// Debug just for -tags debug
 logger.Debug("Debug")
 logger.DebugF("DebugF")
+
 logger.Success("Success")
 logger.SuccessF("SuccessF")
 logger.Error("Error")
@@ -27,7 +29,7 @@ logger.Warn("Warn")
 logger.WarnF("WarnF")
 logger.Info("Info")
 logger.InfoF("InfoF")
-logger.Print("Print")
-logger.Printf("Printf")
+logger.Normal("Normal")
+logger.NormalF("NormalF")
 
 ```
