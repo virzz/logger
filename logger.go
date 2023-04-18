@@ -8,35 +8,35 @@ import (
 )
 
 const (
-	L_NORMAL int = iota + 1
-	L_INFO
-	L_WARN
-	L_ERROR
-	L_FATAL
-	L_SUCCESS
-	L_DEBUG
+	level_NORMAL int = iota + 1
+	level_INFO
+	level_WARN
+	level_ERROR
+	level_FATAL
+	level_SUCCESS
+	level_DEBUG
 	_prefix int = -1
 )
 
 var (
-	ICO = map[int]string{
-		L_NORMAL:  "📃 ",
-		L_INFO:    "💡 ",
-		L_WARN:    "💊 ",
-		L_ERROR:   "❎ ",
-		L_FATAL:   "💢 ",
-		L_SUCCESS: "✅ ",
-		L_DEBUG:   "\n🐛 ",
+	ico = map[int]string{
+		level_NORMAL:  "📃 ",
+		level_INFO:    "💡 ",
+		level_WARN:    "💊 ",
+		level_ERROR:   "❎ ",
+		level_FATAL:   "💢 ",
+		level_SUCCESS: "✅ ",
+		level_DEBUG:   "\n🐛 ",
 	}
-	C = map[int]Color{
-		L_NORMAL:  LightWhite,
-		L_INFO:    LightCyan,
-		L_WARN:    LightYellow,
-		L_ERROR:   LightRed,
-		L_FATAL:   LightRed,
-		L_SUCCESS: LightGreen,
-		L_DEBUG:   LightBlue,
-		_prefix:   LightMagenta,
+	c = map[int]color{
+		level_NORMAL:  lightWhite,
+		level_INFO:    lightCyan,
+		level_WARN:    lightYellow,
+		level_ERROR:   lightRed,
+		level_FATAL:   lightRed,
+		level_SUCCESS: lightGreen,
+		level_DEBUG:   lightBlue,
+		_prefix:       lightMagenta,
 	}
 )
 
@@ -48,24 +48,45 @@ type Logger struct {
 
 var std = NewLogger()
 
-func NewLogger() *Logger { return &Logger{std: log.New(os.Stderr, "", 0), depth: 4} }
-func GetLogger() *Logger { return std }
+func fileLogger(f *os.File) *Logger { return &Logger{std: log.New(f, "", 0), depth: 4} }
 
-func (l *Logger) print(lv int, v ...any) { l.std.Output(l.depth, C[lv].Text(ICO[lv]+fmt.Sprint(v...))) }
+func NewLogger() *Logger { return fileLogger(os.Stderr) }
+func GetLogger() *Logger { return std }
+func FileLogger(fn ...string) *Logger {
+	if len(fn) > 0 && len(fn[0]) > 0 {
+		lf, err := os.OpenFile(fn[0], os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+		if err != nil {
+			Error(err)
+		}
+		return fileLogger(lf)
+	}
+	return NewLogger()
+}
+
+func (l *Logger) print(lv int, v ...any) { l.std.Output(l.depth, c[lv].Text(ico[lv]+fmt.Sprint(v...))) }
 func (l *Logger) fatal(lv int, v ...any) {
-	l.std.Output(l.depth, C[lv].Text(ICO[lv]+fmt.Sprint(v...)))
+	l.std.Output(l.depth, c[lv].Text(ico[lv]+fmt.Sprint(v...)))
 	os.Exit(1)
 }
 
 /* ======= Export Logger Function (l *Logger) ======= */
 
+func (l *Logger) SetFileLog(fn string) {
+	lf, err := os.OpenFile(fn, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+	if err != nil {
+		Error(err)
+	}
+	l.std = log.New(lf, "", l.currentFlag)
+}
+
 func (l *Logger) SetPrefix(prefix string) {
 	if len(prefix) > 0 {
-		l.std.SetPrefix(C[_prefix].Text(fmt.Sprintf("[%s] ", prefix)))
+		l.std.SetPrefix(c[_prefix].Text(fmt.Sprintf("[%s] ", prefix)))
 	} else {
 		l.std.SetPrefix("")
 	}
 }
+
 func (l *Logger) SetFlags(flag int) {
 	l.currentFlag = l.std.Flags()
 	l.std.SetFlags(flag)
@@ -76,18 +97,18 @@ func (l *Logger) SetDefaultFlags()            { l.SetFlags(0) }
 func (l *Logger) ResetFlags()                 { l.std.SetFlags(l.currentFlag) }
 func (l *Logger) SetOutput(w io.Writer)       { l.std.SetOutput(w) }
 func (l *Logger) SetDepth(i int)              { l.depth = i }
-func (l *Logger) Normal(v ...any)             { l.print(L_NORMAL, v...) }
-func (l *Logger) Info(v ...any)               { l.print(L_INFO, v...) }
-func (l *Logger) Warn(v ...any)               { l.print(L_WARN, v...) }
-func (l *Logger) Error(v ...any)              { l.print(L_ERROR, v...) }
-func (l *Logger) Fatal(v ...any)              { l.fatal(L_FATAL, v...) }
-func (l *Logger) Success(v ...any)            { l.print(L_SUCCESS, v...) }
-func (l *Logger) NormalF(f string, v ...any)  { l.print(L_NORMAL, fmt.Sprintf(f, v...)) }
-func (l *Logger) InfoF(f string, v ...any)    { l.print(L_INFO, fmt.Sprintf(f, v...)) }
-func (l *Logger) WarnF(f string, v ...any)    { l.print(L_WARN, fmt.Sprintf(f, v...)) }
-func (l *Logger) ErrorF(f string, v ...any)   { l.print(L_ERROR, fmt.Sprintf(f, v...)) }
-func (l *Logger) FatalF(f string, v ...any)   { l.fatal(L_FATAL, fmt.Sprintf(f, v...)) }
-func (l *Logger) SuccessF(f string, v ...any) { l.print(L_SUCCESS, fmt.Sprintf(f, v...)) }
+func (l *Logger) Normal(v ...any)             { l.print(level_NORMAL, v...) }
+func (l *Logger) Info(v ...any)               { l.print(level_INFO, v...) }
+func (l *Logger) Warn(v ...any)               { l.print(level_WARN, v...) }
+func (l *Logger) Error(v ...any)              { l.print(level_ERROR, v...) }
+func (l *Logger) Fatal(v ...any)              { l.fatal(level_FATAL, v...) }
+func (l *Logger) Success(v ...any)            { l.print(level_SUCCESS, v...) }
+func (l *Logger) NormalF(f string, v ...any)  { l.print(level_NORMAL, fmt.Sprintf(f, v...)) }
+func (l *Logger) InfoF(f string, v ...any)    { l.print(level_INFO, fmt.Sprintf(f, v...)) }
+func (l *Logger) WarnF(f string, v ...any)    { l.print(level_WARN, fmt.Sprintf(f, v...)) }
+func (l *Logger) ErrorF(f string, v ...any)   { l.print(level_ERROR, fmt.Sprintf(f, v...)) }
+func (l *Logger) FatalF(f string, v ...any)   { l.fatal(level_FATAL, fmt.Sprintf(f, v...)) }
+func (l *Logger) SuccessF(f string, v ...any) { l.print(level_SUCCESS, fmt.Sprintf(f, v...)) }
 
 /* ======= Export Logger Function ======= */
 
