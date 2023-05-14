@@ -73,3 +73,8 @@ func TestAll(t *testing.T) {
 	NormalF("NormalF %s", "test")
 	Fatal("Fatal")
 }
+
+func TestLogToFile(t *testing.T) {
+	std.SetFileLog("test.log")
+	std.Info("test")
+}

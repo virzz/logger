@@ -48,20 +48,21 @@ type Logger struct {
 
 var std = NewLogger()
 
-func fileLogger(f *os.File) *Logger { return &Logger{std: log.New(f, "", 0), depth: 4} }
-
-func NewLogger() *Logger { return fileLogger(os.Stderr) }
-func GetLogger() *Logger { return std }
+func fileLogger(w io.Writer) *Logger { return &Logger{std: log.New(w, "", 0), depth: 4} }
+func GetLogger() *Logger             { return std }
+func NewLogger() *Logger             { return fileLogger(os.Stderr) }
 func FileLogger(fn ...string) *Logger {
+	logFile := "logger.log"
 	if len(fn) > 0 && len(fn[0]) > 0 {
-		lf, err := os.OpenFile(fn[0], os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
-		if err != nil {
-			Error(err)
-		}
-		return fileLogger(lf)
+		logFile = fn[0]
 	}
-	return NewLogger()
+	f, err := os.OpenFile(logFile, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0o666)
+	if err != nil {
+		return NewLogger()
+	}
+	return fileLogger(Writer{f: f})
 }
+func SetFileLogger(fn ...string) { std = FileLogger(fn...) }
 
 func (l *Logger) print(lv int, v ...any) { l.std.Output(l.depth, c[lv].Text(ico[lv]+fmt.Sprint(v...))) }
 func (l *Logger) fatal(lv int, v ...any) {
@@ -72,11 +73,8 @@ func (l *Logger) fatal(lv int, v ...any) {
 /* ======= Export Logger Function (l *Logger) ======= */
 
 func (l *Logger) SetFileLog(fn string) {
-	lf, err := os.OpenFile(fn, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
-	if err != nil {
-		Error(err)
-	}
-	l.std = log.New(lf, "", l.currentFlag)
+	s := FileLogger(fn)
+	l.std = s.std
 }
 
 func (l *Logger) SetPrefix(prefix string) {
