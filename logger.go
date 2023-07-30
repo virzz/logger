@@ -2,98 +2,128 @@ package logger
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"os"
 )
 
 const (
-	level_NORMAL int = iota + 1
-	level_INFO
-	level_WARN
-	level_ERROR
-	level_FATAL
-	level_SUCCESS
-	level_DEBUG
-	_prefix int = -1
-)
-
-var (
-	ico = map[int]string{
-		level_NORMAL:  "📃 ",
-		level_INFO:    "💡 ",
-		level_WARN:    "💊 ",
-		level_ERROR:   "❎ ",
-		level_FATAL:   "💢 ",
-		level_SUCCESS: "✅ ",
-		level_DEBUG:   "\n🐛 ",
-	}
-	c = map[int]color{
-		level_NORMAL:  lightWhite,
-		level_INFO:    lightCyan,
-		level_WARN:    lightYellow,
-		level_ERROR:   lightRed,
-		level_FATAL:   lightRed,
-		level_SUCCESS: lightGreen,
-		level_DEBUG:   lightBlue,
-		_prefix:       lightMagenta,
-	}
+	LoggerPrint = 1 << 0
+	LoggerFile  = 1 << 1
 )
 
 type Logger struct {
-	std         *log.Logger
 	depth       int
 	currentFlag int
+	pLog        *log.Logger
+	fLog        *log.Logger
 }
 
-var std = NewLogger()
+var std = NewLogger(LoggerPrint)
 
-func fileLogger(w io.Writer) *Logger { return &Logger{std: log.New(w, "", 0), depth: 4} }
-func GetLogger() *Logger             { return std }
-func NewLogger() *Logger             { return fileLogger(os.Stderr) }
-func FileLogger(fn ...string) *Logger {
+func GetLogger() *Logger { return std }
+func Default() *Logger {
+	return NewLogger(LoggerPrint)
+}
+func NewLogger(typ int, fn ...string) *Logger {
+	l := &Logger{depth: 4}
+	switch typ {
+	case LoggerPrint:
+		l.pLog = log.New(os.Stderr, "", 0)
+	case LoggerFile:
+		l.fLog = loggerFile(fn...)
+	case LoggerPrint | LoggerFile:
+		l.pLog = log.New(os.Stderr, "", 0)
+		l.fLog = loggerFile(fn...)
+	default:
+		l.pLog = log.New(os.Stderr, "", 0)
+	}
+	return l
+}
+
+func loggerFile(fn ...string) *log.Logger {
 	logFile := "logger.log"
 	if len(fn) > 0 && len(fn[0]) > 0 {
 		logFile = fn[0]
 	}
 	f, err := os.OpenFile(logFile, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0o666)
 	if err != nil {
-		return NewLogger()
+		Default().Error(err)
+		return nil
 	}
-	return fileLogger(Writer{f: f})
+	return log.New(f, "", 0)
 }
-func SetFileLogger(fn ...string) { std = FileLogger(fn...) }
 
-func (l *Logger) print(lv int, v ...any) { l.std.Output(l.depth, c[lv].Text(ico[lv]+fmt.Sprint(v...))) }
+func (l *Logger) print(lv int, v ...any) {
+	var output = ico[lv] + fmt.Sprint(v...)
+	if l.pLog != nil {
+		l.pLog.Output(l.depth, c[lv].Text(output))
+	}
+	if l.fLog != nil {
+		l.fLog.Output(l.depth, output)
+	}
+}
+
+func (l *Logger) printf(lv int, f string, v ...any) {
+	var output = ico[lv] + fmt.Sprintf(f, v...)
+	if l.pLog != nil {
+		l.pLog.Output(l.depth, c[lv].Text(output))
+	}
+	if l.fLog != nil {
+		l.fLog.Output(l.depth, output)
+	}
+}
+
 func (l *Logger) fatal(lv int, v ...any) {
-	l.std.Output(l.depth, c[lv].Text(ico[lv]+fmt.Sprint(v...)))
+	l.print(lv, v...)
+	os.Exit(1)
+}
+func (l *Logger) fatalf(lv int, f string, v ...any) {
+	l.printf(lv, f, v...)
 	os.Exit(1)
 }
 
 /* ======= Export Logger Function (l *Logger) ======= */
 
-func (l *Logger) SetFileLog(fn string) {
-	s := FileLogger(fn)
-	l.std = s.std
-}
-
 func (l *Logger) SetPrefix(prefix string) {
 	if len(prefix) > 0 {
-		l.std.SetPrefix(c[_prefix].Text(fmt.Sprintf("[%s] ", prefix)))
+		if l.pLog != nil {
+			l.pLog.SetPrefix(c[_prefix].Text("[" + prefix + "] "))
+		}
+		if l.fLog != nil {
+			l.fLog.SetPrefix("[" + prefix + "] ")
+		}
 	} else {
-		l.std.SetPrefix("")
+		if l.pLog != nil {
+			l.pLog.SetPrefix("")
+		}
+		if l.fLog != nil {
+			l.fLog.SetPrefix("")
+		}
 	}
 }
 
 func (l *Logger) SetFlags(flag int) {
-	l.currentFlag = l.std.Flags()
-	l.std.SetFlags(flag)
+	if l.pLog != nil {
+		l.currentFlag = l.pLog.Flags()
+		l.pLog.SetFlags(flag)
+	}
+	if l.fLog != nil {
+		l.currentFlag = l.fLog.Flags()
+		l.fLog.SetFlags(flag)
+	}
 }
-func (l *Logger) GetLogLogger() *log.Logger   { return l.std }
+
+func (l *Logger) SetFile(filename string) {
+	l.fLog = loggerFile(filename)
+}
+func (l *Logger) NoFile() {
+	l.fLog.Writer().(*os.File).Close()
+	l.fLog = nil
+}
+
 func (l *Logger) SetDevFlags()                { l.SetFlags(log.Llongfile | log.LstdFlags) }
 func (l *Logger) SetDefaultFlags()            { l.SetFlags(0) }
-func (l *Logger) ResetFlags()                 { l.std.SetFlags(l.currentFlag) }
-func (l *Logger) SetOutput(w io.Writer)       { l.std.SetOutput(w) }
+func (l *Logger) ResetFlags()                 { l.SetFlags(l.currentFlag) }
 func (l *Logger) SetDepth(i int)              { l.depth = i }
 func (l *Logger) Normal(v ...any)             { l.print(level_NORMAL, v...) }
 func (l *Logger) Info(v ...any)               { l.print(level_INFO, v...) }
@@ -101,21 +131,22 @@ func (l *Logger) Warn(v ...any)               { l.print(level_WARN, v...) }
 func (l *Logger) Error(v ...any)              { l.print(level_ERROR, v...) }
 func (l *Logger) Fatal(v ...any)              { l.fatal(level_FATAL, v...) }
 func (l *Logger) Success(v ...any)            { l.print(level_SUCCESS, v...) }
-func (l *Logger) NormalF(f string, v ...any)  { l.print(level_NORMAL, fmt.Sprintf(f, v...)) }
-func (l *Logger) InfoF(f string, v ...any)    { l.print(level_INFO, fmt.Sprintf(f, v...)) }
-func (l *Logger) WarnF(f string, v ...any)    { l.print(level_WARN, fmt.Sprintf(f, v...)) }
-func (l *Logger) ErrorF(f string, v ...any)   { l.print(level_ERROR, fmt.Sprintf(f, v...)) }
-func (l *Logger) FatalF(f string, v ...any)   { l.fatal(level_FATAL, fmt.Sprintf(f, v...)) }
-func (l *Logger) SuccessF(f string, v ...any) { l.print(level_SUCCESS, fmt.Sprintf(f, v...)) }
+func (l *Logger) NormalF(f string, v ...any)  { l.printf(level_NORMAL, f, v...) }
+func (l *Logger) InfoF(f string, v ...any)    { l.printf(level_INFO, f, v...) }
+func (l *Logger) WarnF(f string, v ...any)    { l.printf(level_WARN, f, v...) }
+func (l *Logger) ErrorF(f string, v ...any)   { l.printf(level_ERROR, f, v...) }
+func (l *Logger) FatalF(f string, v ...any)   { l.fatalf(level_FATAL, f, v...) }
+func (l *Logger) SuccessF(f string, v ...any) { l.printf(level_SUCCESS, f, v...) }
 
 /* ======= Export Logger Function ======= */
 
 func SetFlags(flag int)           { std.SetFlags(flag) }
 func SetDevFlags()                { std.SetDevFlags() }
 func ResetFlags()                 { std.ResetFlags() }
-func SetOutput(w io.Writer)       { std.SetOutput(w) }
 func SetDepth(i int)              { std.SetDepth(i) }
 func SetPrefix(prefix string)     { std.SetPrefix(prefix) }
+func SetFile(filename string)     { std.SetFile(filename) }
+func NoFile()                     { std.NoFile() }
 func Normal(v ...any)             { std.Normal(v...) }
 func Info(v ...any)               { std.Info(v...) }
 func Warn(v ...any)               { std.Warn(v...) }

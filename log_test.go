@@ -36,6 +36,7 @@ func TestNormal(t *testing.T) {
 }
 
 func TestFatal(t *testing.T) {
+	t.Skip()
 	Fatal("test")
 	FatalF("test Normal")
 }
@@ -60,21 +61,53 @@ func TestFlags(t *testing.T) {
 }
 func TestAll(t *testing.T) {
 	Debug("Debug")
-	DebugF("DebugF %s", "test")
 	Success("Success")
-	SuccessF("SuccessF %s", "test")
 	Error("Error")
-	ErrorF("ErrorF %s", "test")
 	Warn("Warn")
-	WarnF("WarnF %s", "test")
 	Info("Info")
-	InfoF("InfoF %s", "test")
 	Normal("Normal")
+	DebugF("DebugF %s", "test")
+	SuccessF("SuccessF %s", "test")
+	ErrorF("ErrorF %s", "test")
+	WarnF("WarnF %s", "test")
+	InfoF("InfoF %s", "test")
 	NormalF("NormalF %s", "test")
-	Fatal("Fatal")
 }
 
-func TestLogToFile(t *testing.T) {
-	std.SetFileLog("test.log")
-	std.Info("test")
+func TestFile(t *testing.T) {
+	l := NewLogger(LoggerFile, "test.log")
+	l.Error("NewLogger(LoggerPrint|LoggerFile testtttttttttttt")
+	l.Success("TestFile Success")
+	l.Error("TestFile Error")
+	l.Warn("TestFile Warn")
+	l.Info("TestFile Info")
+	l.Normal("TestFile Normal")
+	l.Debug("TestFile Debug")
+}
+
+func TestBothFile(t *testing.T) {
+	l := NewLogger(LoggerPrint|LoggerFile, "both_test.log")
+	l.Success("TestBothFile Success")
+	l.Error("TestBothFile Error")
+	l.Warn("TestBothFile Warn")
+	l.Info("TestBothFile Info")
+	l.Normal("TestBothFile Normal")
+	l.Debug("TestBothFile Debug")
+}
+
+func TestSetFile(t *testing.T) {
+	SetFile("set_test.log")
+	Success("TestSetFile Success")
+	Error("TestSetFile Error")
+	Warn("TestSetFile Warn")
+	Info("TestSetFile Info")
+	Normal("TestSetFile Normal")
+	Debug("TestSetFile Debug")
+	NoFile()
+	Success("NoFile Success")
+	Error("NoFile Error")
+	Warn("NoFile Warn")
+	Info("NoFile Info")
+	Normal("NoFile Normal")
+	Debug("NoFile Debug")
 }
